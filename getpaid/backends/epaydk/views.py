@@ -7,7 +7,7 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from django.views.generic import View
 from django.shortcuts import redirect, get_object_or_404
 from django.forms import ValidationError
-from django.db.models.loading import get_model
+from django.apps import apps
 
 
 from getpaid.backends.epaydk import PaymentProcessor
@@ -66,13 +66,13 @@ class AcceptView(View):
     """
     This view is called after the payment is submitted for processing.
     Redirects to GETPAID_SUCCESS_URL_NAME if it's defined
-    otherwise to getpaid-success-fallback.
+    otherwise to getpaid:success-fallback.
     """
 
     http_method_names = ['get', ]
 
     def get(self, request):
-        Payment = get_model('getpaid', 'Payment')
+        Payment = apps.get_model('getpaid', 'Payment')
         form = EpaydkOnlineForm(request.GET)
         if not form.is_valid():
             logger.debug("EpaydkOnlineForm not valid")
@@ -105,14 +105,14 @@ class AcceptView(View):
         url_name = getattr(settings, 'GETPAID_SUCCESS_URL_NAME', None)
         if url_name:
             return redirect(url_name, pk=payment.order.pk)
-        return redirect('getpaid-success-fallback', pk=payment.pk)
+        return redirect('getpaid:success-fallback', pk=payment.pk)
 
 
 class CancelView(View):
     """
     This view is called after the payment is submitted for processing.
     Redirects to GETPAID_FAILURE_URL_NAME if it's defined
-    otherwise to getpaid-failure-fallback.
+    otherwise to getpaid:failure-fallback.
     """
     http_method_names = ['get', ]
 
@@ -121,7 +121,7 @@ class CancelView(View):
         Receives params: orderid as int payment id and error as negative int.
         @warning: epay.dk doesn't send hash param!
         """
-        Payment = get_model('getpaid', 'Payment')
+        Payment = apps.get_model('getpaid', 'Payment')
         form = EpaydkCancellForm(request.GET)
         if not form.is_valid():
             logger.debug("EpaydkCancellForm not valid")
@@ -144,4 +144,4 @@ class CancelView(View):
         url_name = getattr(settings, 'GETPAID_FAILURE_URL_NAME', None)
         if url_name:
             return redirect(url_name, pk=payment.order.pk)
-        return redirect('getpaid-failure-fallback', pk=payment.pk)
+        return redirect('getpaid:failure-fallback', pk=payment.pk)

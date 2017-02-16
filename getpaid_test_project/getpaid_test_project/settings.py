@@ -142,7 +142,6 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 
     'djcelery',
-    # 'djcelery.transport',
     'kombu.transport.django',
 
     'getpaid',
@@ -182,35 +181,36 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'django.db': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        'factory': {
+            'handlers': ['console'],
+            'level': 'WARN',
+        },
 
-        'getpaid_test_project':{
+        'getpaid_test_project': {
             'handlers': ['console'],
             'level': 'DEBUG',
         },
 
         #You can do some fancy logging ;)
-        'getpaid.backends.payu':{
+        'getpaid.backends': {
             'handlers': ['console'],
             'level': 'DEBUG',
         },
-        'getpaid.backends.przelewy24':{
-            'handlers': ['console'],
-            'level': 'DEBUG',
-        },
-        'getpaid.backends.transferuj':{
-            'handlers': ['console'],
-            'level': 'DEBUG',
-        }
-
     }
 }
 
 
 # This example uses the simplest django-celery queue possible - Database, don't use it on production!
 
-BROKER_URL = 'django://'
-
-
+#BROKER_URL = 'django://'
+BROKER_BACKEND = 'memory'
+CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
+CELERY_ALWAYS_EAGER = True
 
 import djcelery
 djcelery.setup_loader()

@@ -2,8 +2,9 @@
 from decimal import Decimal
 import logging
 import datetime
+
+from django.apps import apps
 from django.core.urlresolvers import reverse
-from django.db.models import get_model
 from django.utils.timezone import utc
 import requests
 import time
@@ -64,8 +65,8 @@ class PaymentProcessor(PaymentProcessorBase):
         etree.SubElement(xml_values, "Valor", moeda=self.payment.currency).text = str(self.payment.amount)
 
         etree.SubElement(xml_instruction, "IdProprio").text = "%s-%s" % (str(self.payment.id), str(time.time()))
-        etree.SubElement(xml_instruction, "URLRetorno").text = PaymentProcessor._get_view_full_url(request, 'getpaid-moip-success', args=(self.payment.id,))
-        etree.SubElement(xml_instruction, "URLNotificacao").text = PaymentProcessor._get_view_full_url(request, 'getpaid-moip-notifications')
+        etree.SubElement(xml_instruction, "URLRetorno").text = PaymentProcessor._get_view_full_url(request, 'getpaid:moip:success', args=(self.payment.id,))
+        etree.SubElement(xml_instruction, "URLNotificacao").text = PaymentProcessor._get_view_full_url(request, 'getpaid:moip:notifications')
 
         # collect customer data
         customer_info = {}
@@ -95,7 +96,7 @@ class PaymentProcessor(PaymentProcessorBase):
 
     @staticmethod
     def process_notification(params):
-        Payment = get_model('getpaid', 'Payment')
+        Payment = apps.get_model('getpaid', 'Payment')
         try:
             payment = Payment.objects.get(pk=int(params["id"].split("-")[0]))
         except Payment.DoesNotExist:

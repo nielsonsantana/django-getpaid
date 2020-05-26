@@ -6,7 +6,7 @@ import uuid
 import requests
 import time
 from django.core.urlresolvers import reverse
-from django.db.models import get_model
+from django.apps import apps
 from django.utils.timezone import utc
 from django.utils.translation import ugettext_lazy as _
 from getpaid.signals import user_data_query
@@ -158,7 +158,7 @@ class PaymentProcessor(PaymentProcessorBase):
 
         transaction_url = tmp_transaction_url + "%s?email=%s&token=%s"
 
-        Payment = get_model('getpaid', 'Payment')
+        Payment = apps.get_model('getpaid', 'Payment')
         
         token = payp.get_backend_setting('token')
         email = payp.get_backend_setting('email')
